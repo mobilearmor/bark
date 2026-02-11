@@ -72,8 +72,8 @@ class Bark {
         private fun collectLogsAndShare(appContext: Context) : File? {
         try {
             // Source directory - inferred from logback.xml configuration
-            // Logback config uses: ${EXT_DIR}/dump_007/ where EXT_DIR = cacheDir()
-            val dumpsDir: File = File(appContext.cacheDir, "dump_007")
+            // Logback config uses: ${EXT_DIR}/bark_007/ where EXT_DIR = cacheDir()
+            val dumpsDir: File = File(appContext.cacheDir, "bark_007")
 
             // Check if directory exists
             if (!dumpsDir.exists() || !dumpsDir.isDirectory) {
