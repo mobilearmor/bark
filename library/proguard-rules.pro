@@ -20,4 +20,6 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
+# Keep Bark public API
 -keep class com.tree.Bark { *; }
+-keep class com.tree.Bark$Companion { *; }
