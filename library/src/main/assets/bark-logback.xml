@@ -1,0 +1,36 @@
+<configuration>
+    <!-- File appender with rolling policy -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- Log file location in app's internal storage -->
+        <file>${EXT_DIR}/bark_007/app.log</file>
+
+        <!-- Pattern for log entries -->
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+
+        <!-- Rolling policy: rotate when file reaches 5MB, keep 3 old files -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <fileNamePattern>${EXT_DIR}/bark_007/app.%i.log.gz</fileNamePattern>
+            <minIndex>1</minIndex>
+            <maxIndex>3</maxIndex>
+        </rollingPolicy>
+
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>10MB</maxFileSize>
+        </triggeringPolicy>
+    </appender>
+
+    <!-- Logcat appender (optional, but useful for debugging) -->
+    <appender name="LOGCAT" class="ch.qos.logback.classic.android.LogcatAppender">
+        <encoder>
+            <pattern>%msg</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Root logger configuration -->
+    <root level="DEBUG">
+        <appender-ref ref="FILE" />
+        <appender-ref ref="LOGCAT" />
+    </root>
+</configuration>
