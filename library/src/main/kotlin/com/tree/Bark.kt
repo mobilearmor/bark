@@ -131,7 +131,13 @@ class Bark {
                     ZipFile(zipFile)
                 }
 
-                zip.addFolder(sourceDir, zipParameters)
+                files.forEach { entry ->
+                    if (entry.isFile) {
+                        zip.addFile(entry, zipParameters)
+                    } else if (entry.isDirectory) {
+                        zip.addFolder(entry, zipParameters)
+                    }
+                }
                 true
             } catch (e: Exception) {
                 Timber.e(e, "Error creating zip file")
