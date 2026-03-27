@@ -26,7 +26,7 @@ dependencyResolutionManagement {
 **`build.gradle.kts` (app module)**
 ```kotlin
 dependencies {
-    implementation("com.github.mobilearmor:bark:0.0.1")
+    implementation("com.github.mobilearmor:bark:0.1.3")
 }
 ```
 
