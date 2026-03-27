@@ -89,7 +89,10 @@ class Bark {
             val randomNum = random.nextInt(1000000)  // Generate random number for filename
             val zipFileName = "logs_$randomNum.zip"
 
-            val zipFile = File(appContext.cacheDir, zipFileName)
+            val zipDumpDir = File(appContext.cacheDir, "bark_007_dump") // this dir should match with file_paths.xml config in res/xml dir
+            if (zipDumpDir.exists()) zipDumpDir.deleteRecursively()
+            zipDumpDir.mkdirs()
+            val zipFile = File(zipDumpDir, zipFileName)
 
             // Create zip
             val success = createZipFromDirectory(dumpsDir, zipFile)
