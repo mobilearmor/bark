@@ -1,5 +1,6 @@
 package com.tree
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
@@ -20,6 +21,7 @@ import java.util.zip.ZipOutputStream
 class Bark {
 
     companion object {
+        @SuppressLint("LogNotTimber")
         @JvmStatic
         fun init(appContext: Context) {
             val context = LoggerFactory.getILoggerFactory() as LoggerContext
@@ -28,12 +30,14 @@ class Bark {
             val configurator = JoranConfigurator()
             configurator.setContext(context)
             // Set the external directory for log files
-            context.putProperty("EXT_DIR", appContext.cacheDir.absolutePath)
+            context.putProperty("BARK_LOG_DIR", appContext.cacheDir.absolutePath)
+            File(appContext.cacheDir, "bark_007").mkdirs() // this is needed otherwise, logback will silently fail
             try {
                 configurator.doConfigure(appContext.assets.open("bark-logback.xml"))
             } catch (e: Exception) {
-                // Fallback to basic configuration if XML fails
-                Timber.e(e)
+                // we need to log error to Android's Log as we failed to initialize this logger
+                // this will avoid error from being swallowed ;)
+                android.util.Log.e("Bark", "doConfigure failed", e)
             }
             // Plant debug tree for logcat output
             if(BuildConfig.DEBUG)
