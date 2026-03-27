@@ -7,16 +7,15 @@ import android.widget.Toast
 import androidx.core.content.FileProvider
 import ch.qos.logback.classic.LoggerContext
 import ch.qos.logback.classic.joran.JoranConfigurator
+import net.lingala.zip4j.ZipFile
+import net.lingala.zip4j.model.ZipParameters
+import net.lingala.zip4j.model.enums.AesKeyStrength
+import net.lingala.zip4j.model.enums.EncryptionMethod
 import org.slf4j.LoggerFactory
 import timber.log.Timber
 import timber.log.Timber.DebugTree
 import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.io.IOException
 import java.util.Random
-import java.util.zip.ZipEntry
-import java.util.zip.ZipOutputStream
 
 class Bark {
 
@@ -49,7 +48,8 @@ class Bark {
         @JvmStatic
         fun shareLog(context: Context) {
             try {
-                val zipFile = collectLogsAndShare(context) ?: return
+                val password = "bark-home"
+                val zipFile = collectLogsAndShare(context, password) ?: return
 
                 val shareIntent = Intent(Intent.ACTION_SEND)
                 shareIntent.type = "application/zip"
@@ -73,11 +73,11 @@ class Bark {
             }
         }
 
-        private fun collectLogsAndShare(appContext: Context) : File? {
+        private fun collectLogsAndShare(appContext: Context, password: String? = null) : File? {
         try {
             // Source directory - inferred from logback.xml configuration
             // Logback config uses: ${EXT_DIR}/bark_007/ where EXT_DIR = cacheDir()
-            val dumpsDir: File = File(appContext.cacheDir, "bark_007")
+            val dumpsDir: File = File(appContext.cacheDir, "bark_007") // this dir name ("bark_007") should match what's inside assets/bark-logback.xml
 
             // Check if directory exists
             if (!dumpsDir.exists() || !dumpsDir.isDirectory) {
@@ -95,7 +95,7 @@ class Bark {
             val zipFile = File(zipDumpDir, zipFileName)
 
             // Create zip
-            val success = createZipFromDirectory(dumpsDir, zipFile)
+            val success = createZipFromDirectory(dumpsDir, zipFile, password)
 
             if (success) {
                 Timber.i("Logs collected successfully: %s", zipFile.absolutePath)
@@ -109,72 +109,33 @@ class Bark {
             return null;
         }
 
-        private fun createZipFromDirectory(sourceDir: File, zipFile: File): Boolean {
-            try {
-                FileOutputStream(zipFile).use { fos ->
-                    ZipOutputStream(fos).use { zos ->
-                        val files = sourceDir.listFiles()
-                        if (files == null || files.size == 0) {
-                            Timber.w("No files found in directory: %s", sourceDir.absolutePath)
-                            return false
-                        }
+        private fun createZipFromDirectory(sourceDir: File, zipFile: File, password: String? = null): Boolean {
+            return try {
+                val files = sourceDir.listFiles()
+                if (files == null || files.isEmpty()) {
+                    Timber.w("No files found in directory: %s", sourceDir.absolutePath)
+                    return false
+                }
 
-                        val buffer = ByteArray(1024)
-
-                        for (file in files) {
-                            if (file.isFile) {
-                                FileInputStream(file).use { fis ->
-                                    val zipEntry = ZipEntry(file.name)
-                                    zos.putNextEntry(zipEntry)
-
-                                    var length: Int
-                                    while ((fis.read(buffer).also { length = it }) > 0) {
-                                        zos.write(buffer, 0, length)
-                                    }
-
-                                    zos.closeEntry()
-                                }
-                            } else if (file.isDirectory) {
-                                // Recursively add directory contents
-                                addDirectoryToZip(file, file.name, zos, buffer)
-                            }
-                        }
-                        return true
+                val zipParameters = ZipParameters().apply {
+                    if (password != null) {
+                        isEncryptFiles = true
+                        encryptionMethod = EncryptionMethod.AES
+                        aesKeyStrength = AesKeyStrength.KEY_STRENGTH_256
                     }
                 }
-            } catch (e: IOException) {
+
+                val zip = if (password != null) {
+                    ZipFile(zipFile, password.toCharArray())
+                } else {
+                    ZipFile(zipFile)
+                }
+
+                zip.addFolder(sourceDir, zipParameters)
+                true
+            } catch (e: Exception) {
                 Timber.e(e, "Error creating zip file")
-                return false
-            }
-        }
-
-        @Throws(IOException::class)
-        private fun addDirectoryToZip(
-            directory: File,
-            parentPath: String?,
-            zos: ZipOutputStream,
-            buffer: ByteArray
-        ) {
-            val files = directory.listFiles() ?: return
-
-            for (file in files) {
-                val filePath = parentPath + "/" + file.name
-
-                if (file.isFile) {
-                    FileInputStream(file).use { fis ->
-                        val zipEntry = ZipEntry(filePath)
-                        zos.putNextEntry(zipEntry)
-
-                        var length: Int
-                        while ((fis.read(buffer).also { length = it }) > 0) {
-                            zos.write(buffer, 0, length)
-                        }
-
-                        zos.closeEntry()
-                    }
-                } else if (file.isDirectory) {
-                    addDirectoryToZip(file, filePath, zos, buffer)
-                }
+                false
             }
         }
     }

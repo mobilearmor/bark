@@ -47,6 +47,7 @@ dependencies {
     implementation(libs.timber)
     implementation(libs.logback.android)
     implementation(libs.slf4j.api)
+    implementation(libs.zip4j)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
