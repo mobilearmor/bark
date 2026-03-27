@@ -47,10 +47,13 @@ class Bark {
 
         @JvmStatic
         fun shareLog(context: Context) {
-            try {
-                val password = "bark-home"
-                val zipFile = collectLogsAndShare(context, password) ?: return
+            shareLog(context, null)
+        }
 
+        @JvmStatic
+        fun shareLog(context: Context, password: String?) {
+            try {
+                val zipFile = collectLogsAndShare(context, password) ?: return
                 val shareIntent = Intent(Intent.ACTION_SEND)
                 shareIntent.type = "application/zip"
 
