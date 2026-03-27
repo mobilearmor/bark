@@ -14,6 +14,8 @@ A lightweight Android logging library that wraps Timber + Logback + SLF4J to pro
 
 Bark is distributed via [JitPack](https://jitpack.io).
 
+[![](https://jitpack.io/v/mobilearmor/bark.svg)](https://jitpack.io/#mobilearmor/bark)
+
 **`settings.gradle.kts`**
 ```kotlin
 dependencyResolutionManagement {
