@@ -21,4 +21,8 @@
 # the logging calls in your released app.
 -keepclassmembers class ch.qos.logback.** { *; }
 -keepclassmembers class org.slf4j.impl.** { *; }
--keepattributes *Annotation*
+-keep class com.tree.** { *; }
+-keep class net.lingala.zip4j.** { *; }
+-dontwarn ch.qos.logback.**
+-dontwarn org.slf4j.**
+-dontwarn net.lingala.zip4j.**
