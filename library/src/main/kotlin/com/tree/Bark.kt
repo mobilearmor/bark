@@ -22,7 +22,7 @@ class Bark {
     companion object {
         @SuppressLint("LogNotTimber")
         @JvmStatic
-        fun init(appContext: Context) {
+        fun init(appContext: Context, debug: Boolean) {
             val context = LoggerFactory.getILoggerFactory() as LoggerContext
             context.reset()
 
@@ -39,7 +39,7 @@ class Bark {
                 android.util.Log.e("Bark", "doConfigure failed", e)
             }
             // Plant debug tree for logcat output
-            if(BuildConfig.DEBUG)
+            if(debug)
                 Timber.plant(DebugTree())
             // Plant logback tree for file logging with rotation
             Timber.plant(LogbackTree())
